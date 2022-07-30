@@ -101,6 +101,7 @@ export class FixedToken
   register_middlewares(
     app: Application,
     auth: Auth,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _storage: IStorageManager<Config>
   ) {
     // RFC6750 says Bearer must be case sensitive
