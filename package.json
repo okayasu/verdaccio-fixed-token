@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json.schemastore.org/global",
+  "name": "verdaccio-static-token",
+  "version": "0.0.1",
+  "keywords": [
+    "login",
+    "package",
+    "verdaccio"
+  ],
+  "license": "MIT",
+  "author": "Masanori Okayasu",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "clean": "rimraf lib/",
+    "lint:fix": "eslint --fix src/",
+    "lint": "eslint src/",
+    "build": "etsc",
+    "dev": "npm run build && npm run copy && npm run start",
+    "start": "verdaccio -c verdaccio.yaml",
+    "copy": "cpx lib/* plugins/static-token/",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@verdaccio/auth": "^6.0.0-6-next.22",
+    "@verdaccio/commons-api": "^10.2.0",
+    "@verdaccio/types": "^10.5.2",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/node": "^18.6.1",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "cpx": "^1.5.0",
+    "esbuild": "^0.14.50",
+    "esbuild-node-tsc": "^1.8.6",
+    "eslint": "^8.20.0",
+    "jest": "^28.1.3",
+    "parcel": "^2.6.2",
+    "prettier": "^2.7.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.7.4",
+    "verdaccio": "^5.13.3"
+  }
+}

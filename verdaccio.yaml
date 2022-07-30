@@ -1,0 +1,49 @@
+#
+# Look here for more config file examples:
+# https://github.com/verdaccio/verdaccio/tree/master/conf
+#
+
+storage: ./storage
+plugins: ./plugins
+
+log:
+  type: stdout
+  format: pretty
+  level: info
+
+middlewares:
+  static-token:
+    - token: test123
+      user: testuser
+      password: testpass
+
+auth:
+  static-token:
+    - token: test123
+      user: testuser
+      password: testpass
+  htpasswd:
+    file: ./storage/htpasswd
+    algorithm: bcrypt
+
+security:
+  api:
+    jwt:
+      sign:
+        expiresIn: 90d
+  web:
+    sign:
+      expiresIn: 7d
+
+packages:
+  "@*/*":
+    access: $authenticated
+    publish: $authenticated
+    unpublish: $authenticated
+    proxy: npmjs
+
+  "**":
+    access: $authenticated
+    publish: $authenticated
+    unpublish: $authenticated
+    proxy: npmjs
