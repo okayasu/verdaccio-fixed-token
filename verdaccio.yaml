@@ -11,17 +11,19 @@ log:
   format: pretty
   level: info
 
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+
 middlewares:
-  static-token:
+  fixed-token:
     - token: test123
       user: testuser
-      password: testpass
 
 auth:
-  static-token:
+  fixed-token:
     - token: test123
       user: testuser
-      password: testpass
   htpasswd:
     file: ./storage/htpasswd
     algorithm: bcrypt

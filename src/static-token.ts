@@ -15,7 +15,7 @@ import {
 } from "@verdaccio/types";
 import merge from "lodash/merge";
 
-const pluginName = "static-token";
+const pluginName = "fixed-token";
 
 interface PluginConfig {
   token: string;
@@ -56,11 +56,11 @@ const defaultSecurity: Security = {
   },
 };
 
-function getSecurity(config: VerdaccioConfig) {
+function getSecurity(config: VerdaccioConfig): Security {
   return merge({}, defaultSecurity, config.security);
 }
 
-export class StaticToken
+export class FixedToken
   implements IPluginMiddleware<Config>, IPluginAuth<Config>
 {
   config: Config;
@@ -84,18 +84,24 @@ export class StaticToken
   }
 
   allow_access(
-    _user: RemoteUser,
+    user: RemoteUser,
     _pkg: AllowAccess & PackageAccess,
     cb: AuthAccessCallback
   ) {
-    cb(null, true);
+    const datas = this.config.middlewares[pluginName];
+    const found = datas.find((e) => e.user === user.name);
+    if (found) {
+      // console.log("allow access");
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
   }
 
   register_middlewares(
     app: Application,
     auth: Auth,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    storage: IStorageManager<Config>
+    _storage: IStorageManager<Config>
   ) {
     // RFC6750 says Bearer must be case sensitive
     const datas = this.config.middlewares[pluginName];
@@ -105,9 +111,9 @@ export class StaticToken
       const authorization = req.headers["authorization"];
       if (authorization && authorization !== "") {
         const found = datas.find((e) => e.token === authorization.substr(7));
-        console.log(found);
+        // console.log(found);
         if (found) {
-          console.log("Applying custom token");
+          // console.log("Applying custom token");
           const payload: RemoteUser = {
             name: found.user,
             real_groups: [],
@@ -118,7 +124,7 @@ export class StaticToken
           };
           const ret = await auth.jwtEncrypt(payload, sign);
           req.headers["authorization"] = `Bearer ${ret}`;
-          console.log(req.headers["authorization"]);
+          // console.log(req.headers["authorization"]);
         }
       }
       next();

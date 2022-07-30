@@ -1,6 +1,3 @@
-import { StaticToken } from "./static-token";
-import dotenv from "dotenv";
+import { FixedToken } from "./static-token";
 
-dotenv.config();
-
-export default StaticToken;
+export default FixedToken;
