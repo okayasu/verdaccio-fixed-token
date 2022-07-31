@@ -14,23 +14,10 @@ import {
   PackageAccess,
 } from "@verdaccio/types";
 import merge from "lodash/merge";
+import { IConfig, PluginConfig, pluginName } from "./config";
 
-const pluginName = "fixed-token";
-
-interface PluginConfig {
-  token: string;
-  user: string;
-  password: string;
-}
-
-interface Config extends VerdaccioConfig {
-  name: string;
-  middlewares: { [pluginName]: PluginConfig[] };
-  auth: { [pluginName]: PluginConfig[] };
-}
-
-interface Auth extends IBasicAuth<Config> {
-  config: Config;
+interface Auth extends IBasicAuth<IConfig> {
+  config: IConfig;
   apiJWTmiddleware(): NextFunction;
   jwtEncrypt(user: RemoteUser, signOptions: JWTSignOptions): Promise<string>;
   webUIJWTmiddleware(): NextFunction;
@@ -38,43 +25,44 @@ interface Auth extends IBasicAuth<Config> {
 
 const TIME_EXPIRATION_7D = "7d" as const;
 
-const defaultSecurity: Security = {
-  api: {
-    legacy: false,
-    jwt: {
+function getSecurity(config: VerdaccioConfig): Security {
+  const defaultSecurity: Security = {
+    api: {
+      legacy: false,
+      jwt: {
+        sign: {
+          expiresIn: TIME_EXPIRATION_7D,
+        },
+        verify: {},
+      },
+    },
+    web: {
       sign: {
         expiresIn: TIME_EXPIRATION_7D,
       },
       verify: {},
     },
-  },
-  web: {
-    sign: {
-      expiresIn: TIME_EXPIRATION_7D,
-    },
-    verify: {},
-  },
-};
-
-function getSecurity(config: VerdaccioConfig): Security {
+  };
   return merge({}, defaultSecurity, config.security);
 }
 
 export class FixedToken
-  implements IPluginMiddleware<Config>, IPluginAuth<Config>
+  implements IPluginMiddleware<IConfig>, IPluginAuth<IConfig>
 {
-  config: Config;
-  security: Security;
+  config: IConfig;
+  allowUsers: PluginConfig[];
 
-  constructor(config: Config) {
+  constructor(config: IConfig) {
     this.config = config;
-    this.security = getSecurity(this.config);
+    this.allowUsers = config.auth[pluginName].concat(
+      config.middlewares[pluginName]
+    );
   }
 
   authenticate(user: string, _password: string, cb: Callback) {
-    const found = this.config.auth[pluginName].some((e) => e.user === user);
+    const found = this.allowUsers.some((e) => e.user === user);
     if (found) {
-      console.log(`Allowing access to: ${user}`);
+      // console.log(`Allowing access to: ${user}`);
       cb(null, [user]);
       return;
     }
@@ -88,8 +76,7 @@ export class FixedToken
     _pkg: AllowAccess & PackageAccess,
     cb: AuthAccessCallback
   ) {
-    const datas = this.config.middlewares[pluginName];
-    const found = datas.find((e) => e.user === user.name);
+    const found = this.allowUsers.find((e) => e.user === user.name);
     if (found) {
       // console.log("allow access");
       cb(null, true);
@@ -102,10 +89,10 @@ export class FixedToken
     app: Application,
     auth: Auth,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _storage: IStorageManager<Config>
+    _storage: IStorageManager<IConfig>
   ) {
     // RFC6750 says Bearer must be case sensitive
-    const datas = this.config.middlewares[pluginName];
+    const datas = this.allowUsers;
     const security = getSecurity(this.config);
 
     app.use(async function (req: Request, _res: Response, next: Callback) {
@@ -117,8 +104,8 @@ export class FixedToken
           // console.log("Applying custom token");
           const payload: RemoteUser = {
             name: found.user,
-            real_groups: [],
-            groups: [],
+            real_groups: found.groups,
+            groups: found.groups,
           };
           const sign = security?.api?.jwt?.sign || {
             expiresIn: TIME_EXPIRATION_7D,

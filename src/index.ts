@@ -1,3 +1,3 @@
-import { FixedToken } from "./static-token";
+import { FixedToken } from "./fixed-token";
 
 export default FixedToken;
