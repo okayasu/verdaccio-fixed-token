@@ -13,6 +13,6 @@
       "./node_modules/@types"
     ]
   },
-  "include": ["src/*.ts", "types/*.d.ts"],
+  "include": ["src/*.ts", "types/*.d.ts", "tests/*.ts"],
   "exclude": ["node_modules"]
 }
