@@ -17,12 +17,12 @@ uplinks:
 
 middlewares:
   fixed-token:
-    - token: test123
+    - token: token_for_trueuser
       user: trueuser
 
 auth:
   fixed-token:
-    - token: test1234
+    - token: token_for_trueuser2
       user: trueuser2
   htpasswd:
     file: ./storage/htpasswd

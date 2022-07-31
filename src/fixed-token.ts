@@ -1,7 +1,6 @@
-import { Application, NextFunction } from "express";
+import { Application, NextFunction, Request, Response } from "express";
 import {
   IPluginAuth,
-  IStorageManager,
   IPluginMiddleware,
   IBasicAuth,
   Config as VerdaccioConfig,
@@ -16,7 +15,7 @@ import {
 import merge from "lodash/merge";
 import { IConfig, PluginConfig, pluginName } from "./config";
 
-interface Auth extends IBasicAuth<IConfig> {
+export interface IAuth extends IBasicAuth<IConfig> {
   config: IConfig;
   apiJWTmiddleware(): NextFunction;
   jwtEncrypt(user: RemoteUser, signOptions: JWTSignOptions): Promise<string>;
@@ -51,6 +50,7 @@ export class FixedToken
 {
   config: IConfig;
   allowUsers: PluginConfig[];
+  auth: IAuth | undefined;
 
   constructor(config: IConfig) {
     this.config = config;
@@ -85,37 +85,41 @@ export class FixedToken
     }
   }
 
-  register_middlewares(
-    app: Application,
-    auth: Auth,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _storage: IStorageManager<IConfig>
-  ) {
-    // RFC6750 says Bearer must be case sensitive
-    const datas = this.allowUsers;
-    const security = getSecurity(this.config);
+  register_middlewares(app: Application, auth: IAuth) {
+    this.auth = auth;
 
-    app.use(async function (req: Request, _res: Response, next: Callback) {
-      const authorization = req.headers["authorization"];
-      if (authorization && authorization !== "") {
-        const found = datas.find((e) => e.token === authorization.substr(7));
-        // console.log(found);
-        if (found) {
-          // console.log("Applying custom token");
-          const payload: RemoteUser = {
-            name: found.user,
-            real_groups: found.groups,
-            groups: found.groups,
-          };
-          const sign = security?.api?.jwt?.sign || {
-            expiresIn: TIME_EXPIRATION_7D,
-          };
-          const ret = await auth.jwtEncrypt(payload, sign);
-          req.headers["authorization"] = `Bearer ${ret}`;
-          // console.log(req.headers["authorization"]);
-        }
-      }
-      next();
-    });
+    app.use(this.hookToken);
   }
+
+  public hookToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const security = getSecurity(this.config);
+    const authorization = req.headers?.["authorization"];
+    if (authorization && authorization !== "") {
+      const found = this.allowUsers.find(
+        (e) => e.token === authorization.substr(7)
+      );
+      // console.log(found);
+      if (found) {
+        // console.log("Applying custom token");
+        const payload: RemoteUser = {
+          name: found.user,
+          real_groups: found.groups,
+          groups: found.groups,
+        };
+        const sign = security?.api?.jwt?.sign || {
+          expiresIn: TIME_EXPIRATION_7D,
+        };
+        if (this.auth) {
+          const ret = await this.auth.jwtEncrypt(payload, sign);
+          req.headers["authorization"] = `Bearer ${ret}`;
+        }
+        // console.log(req.headers["authorization"]);
+      }
+    }
+    next();
+  };
 }
