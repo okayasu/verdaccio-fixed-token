@@ -130,20 +130,22 @@ describe("fixed-token", () => {
   describe("ahthenticate()", () => {
     test("success", () => {
       const t = new FixedToken(testConfig);
-      const tosuccess = (username: string) => (error: any, allow: string[]) => {
-        try {
+      const tosuccess =
+        (username: string) => (error: unknown, allow: string[]) => {
+          try {
+            expect(error).toBeNull();
+            expect(allow).toContain(username);
+          } catch (error) {
+            console.log(`failed ${username}`);
+            throw error;
+          }
+        };
+      const tofail =
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        (_username: string) => (error: unknown, allow: string[]) => {
           expect(error).toBeNull();
-          expect(allow).toContain(username);
-        } catch (error) {
-          console.log(`failed ${username}`);
-          throw error;
-        }
-      };
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const tofail = (_username: string) => (error: any, allow: string[]) => {
-        expect(error).toBeNull();
-        expect(allow).toBeNull();
-      };
+          expect(allow).toBeNull();
+        };
       const successUsers = [
         { name: "trueuser", password: "testuser" },
         { name: "trueuser2", password: "testuser2" },

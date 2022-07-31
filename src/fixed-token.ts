@@ -25,21 +25,18 @@ export interface IAuth extends IBasicAuth<IConfig> {
 const TIME_EXPIRATION_7D = "7d" as const;
 
 function getSecurity(config: VerdaccioConfig): Security {
-  const defaultSecurity: Security = {
+  const defaultSecurity = {
     api: {
-      legacy: false,
       jwt: {
         sign: {
           expiresIn: TIME_EXPIRATION_7D,
         },
-        verify: {},
       },
     },
     web: {
       sign: {
         expiresIn: TIME_EXPIRATION_7D,
       },
-      verify: {},
     },
   };
   return merge({}, defaultSecurity, config.security);
@@ -100,7 +97,7 @@ export class FixedToken
     const authorization = req.headers?.["authorization"];
     if (authorization && authorization !== "") {
       const found = this.allowUsers.find(
-        (e) => e.token === authorization.substr(7)
+        (e) => `Bearer ${e.token}` === authorization
       );
       // console.log(found);
       if (found) {
