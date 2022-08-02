@@ -12,7 +12,7 @@ login as temporary account and it have read only permission
 
 ## configuration
 
----yaml
+```configuration.yaml
 middlewares:
   fixed-token:
     - token: some_string_to_use_access_token
@@ -20,13 +20,12 @@ middlewares:
     - token: second_string_to_use_access_token
       user: other_user
 
----
+```
 
----.npmrc
+```.npmrc
 //myverdaccio.example.com/:_authToken=some_string_to_use_access_token
 
----
-
+```
 
 ## license
 
