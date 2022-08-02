@@ -14,13 +14,13 @@
     "lib"
   ],
   "scripts": {
-    "clean": "rimraf lib/",
+    "clean": "rimraf lib/ plugins/*",
     "lint:fix": "eslint --fix src/",
     "lint": "eslint src/",
     "build": "etsc",
     "dev": "npm run build && npm run copy && npm run start",
     "start": "verdaccio -c verdaccio.yaml",
-    "copy": "cpx lib/* plugins/fixed-token/",
+    "copy": "cpx lib/src/* plugins/fixed-token/",
     "test": "jest"
   },
   "devDependencies": {
