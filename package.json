@@ -20,7 +20,7 @@
     "build": "etsc",
     "dev": "npm run build && npm run copy && npm run start",
     "start": "verdaccio -c verdaccio.yaml",
-    "copy": "cpx lib/src/* plugins/fixed-token/",
+    "copy": "cpx lib/* plugins/fixed-token/",
     "test": "jest"
   },
   "devDependencies": {
