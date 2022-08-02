@@ -21,9 +21,6 @@ middlewares:
       user: trueuser
 
 auth:
-  fixed-token:
-    - token: token_for_trueuser2
-      user: trueuser2
   htpasswd:
     file: ./storage/htpasswd
     algorithm: bcrypt

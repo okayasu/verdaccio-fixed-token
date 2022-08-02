@@ -21,9 +21,6 @@ middlewares:
       user: testuser
 
 auth:
-  fixed-token:
-    - token: test123
-      user: testuser
   htpasswd:
     file: ./storage/htpasswd
     algorithm: bcrypt

@@ -126,35 +126,4 @@ describe("fixed-token", () => {
       );
     });
   });
-
-  describe("ahthenticate()", () => {
-    test("success", () => {
-      const t = new FixedToken(testConfig);
-      const tosuccess =
-        (username: string) => (error: unknown, allow: string[]) => {
-          try {
-            expect(error).toBeNull();
-            expect(allow).toContain(username);
-          } catch (error) {
-            console.log(`failed ${username}`);
-            throw error;
-          }
-        };
-      const tofail =
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        (_username: string) => (error: unknown, allow: string[]) => {
-          expect(error).toBeNull();
-          expect(allow).toBeNull();
-        };
-      const successUsers = [
-        { name: "trueuser", password: "testuser" },
-        { name: "trueuser2", password: "testuser2" },
-      ];
-
-      for (const u of successUsers) {
-        t.authenticate(u.name, u.password, tosuccess(u.name));
-      }
-      t.authenticate("faileuser", "truepassword", tofail("faileuser"));
-    });
-  });
 });
