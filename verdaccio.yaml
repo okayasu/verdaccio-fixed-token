@@ -11,10 +11,6 @@ log:
   format: pretty
   level: info
 
-uplinks:
-  npmjs:
-    url: https://registry.npmjs.org/
-
 middlewares:
   fixed-token:
     - token: test123

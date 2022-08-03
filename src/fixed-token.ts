@@ -2,12 +2,14 @@ import { Application, NextFunction, Request, Response } from "express";
 import {
   IPluginMiddleware,
   IBasicAuth,
+  IPluginAuth,
   Security,
   RemoteUser,
   JWTSignOptions,
   AllowAccess,
   AuthAccessCallback,
   PackageAccess,
+  Callback,
 } from "@verdaccio/types";
 import { IConfig, PluginConfig, pluginName } from "./config";
 
@@ -20,7 +22,9 @@ export interface IAuth extends IBasicAuth<IConfig> {
 
 const TIME_EXPIRATION_7D = "7d" as const;
 
-export class FixedToken implements IPluginMiddleware<IConfig> {
+export class FixedToken
+  implements IPluginMiddleware<IConfig>, IPluginAuth<IConfig>
+{
   security: Security;
   allowUsers: PluginConfig[];
   auth: IAuth | undefined;
@@ -30,11 +34,17 @@ export class FixedToken implements IPluginMiddleware<IConfig> {
     this.allowUsers = config.middlewares[pluginName];
   }
 
+  authenticate(_user: string, _password: string, cb: Callback) {
+    console.log("called authenticate");
+    cb(null, null);
+  }
+
   allow_access(
     user: RemoteUser,
     _pkg: AllowAccess & PackageAccess,
     cb: AuthAccessCallback
   ) {
+    console.log("called allow_access");
     const found = this.allowUsers.find((e) => e.user === user.name);
     if (found) {
       // console.log("allow access");
@@ -61,11 +71,11 @@ export class FixedToken implements IPluginMiddleware<IConfig> {
         (e) => `Bearer ${e.token}` === authorization
       );
       if (found) {
-        // console.log("Applying custom token");
+        // console.log(`Applying custom token for ${found.user}`);
         const payload: RemoteUser = {
           name: found.user,
-          real_groups: found.groups,
-          groups: found.groups,
+          real_groups: [],
+          groups: [],
         };
         const sign = this.security?.api?.jwt?.sign || {
           expiresIn: TIME_EXPIRATION_7D,
