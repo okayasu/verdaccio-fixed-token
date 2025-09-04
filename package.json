@@ -20,7 +20,7 @@
     "build": "etsc",
     "dev": "npm run build && npm run copy && npm run start",
     "start": "verdaccio -c verdaccio.yaml",
-    "copy": "cpx lib/* plugins/fixed-token/",
+    "copy": "cpy package.json lib/* plugins/fixed-token/",
     "test": "jest"
   },
   "devDependencies": {
@@ -31,7 +31,7 @@
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@verdaccio/config": "^6.0.0-6-next.14",
     "@verdaccio/types": "^10.5.2",
-    "cpx": "^1.5.0",
+    "cpy-cli": "^6.0.0",
     "esbuild": "^0.14.50",
     "esbuild-node-tsc": "^1.8.6",
     "eslint": "^8.20.0",
