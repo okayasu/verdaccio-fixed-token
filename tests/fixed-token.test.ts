@@ -10,7 +10,7 @@ describe("fixed-token", () => {
   let mockResponse: Partial<Response>;
   const nextFunction: NextFunction = jest.fn();
   const testConfig = new Config(
-    parseConfigFile(path.join(__dirname, "./__fixtures__/config.yaml"))
+    parseConfigFile(path.join(__dirname, "./__fixtures__/config.yaml")),
   ) as unknown as IConfig;
 
   beforeEach(() => {
@@ -27,9 +27,9 @@ describe("fixed-token", () => {
       await t.hookToken(
         mockRequest as Request,
         mockResponse as Response,
-        nextFunction
+        nextFunction,
       );
-      expect(nextFunction).toBeCalled();
+      expect(nextFunction).toHaveBeenCalled();
     });
 
     test("without authrization header", async () => {
@@ -40,9 +40,9 @@ describe("fixed-token", () => {
       await t.hookToken(
         mockRequest as Request,
         mockResponse as Response,
-        nextFunction
+        nextFunction,
       );
-      expect(nextFunction).toBeCalled();
+      expect(nextFunction).toHaveBeenCalled();
     });
 
     test("with invalid authrization header", async () => {
@@ -55,9 +55,9 @@ describe("fixed-token", () => {
       await t.hookToken(
         mockRequest as Request,
         mockResponse as Response,
-        nextFunction
+        nextFunction,
       );
-      expect(nextFunction).toBeCalled();
+      expect(nextFunction).toHaveBeenCalled();
     });
 
     test("with true authrization header", async () => {
@@ -71,8 +71,8 @@ describe("fixed-token", () => {
         apiJWTmiddleware: () => () => {},
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         webUIJWTmiddleware: () => () => {},
-        aesEncrypt: () => {
-          return Buffer.from("");
+        aesEncrypt: (username: string, password: string): string => {
+          return "";
         },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         authenticate: () => {},
@@ -88,7 +88,7 @@ describe("fixed-token", () => {
           // eslint-disable-next-line @typescript-eslint/no-empty-function
           use: () => {},
         } as Application,
-        mockAuth
+        mockAuth,
       );
 
       mockRequest = {
@@ -99,13 +99,13 @@ describe("fixed-token", () => {
       await t.hookToken(
         mockRequest as Request,
         mockResponse as Response,
-        nextFunction
+        nextFunction,
       );
-      expect(nextFunction).toBeCalled();
+      expect(nextFunction).toHaveBeenCalled();
       expect(mockRequest.headers).toEqual(
         expect.objectContaining({
           authorization: "Bearer trueuser_dummyresponse",
-        })
+        }),
       );
 
       mockRequest = {
@@ -116,13 +116,13 @@ describe("fixed-token", () => {
       await t.hookToken(
         mockRequest as Request,
         mockResponse as Response,
-        nextFunction
+        nextFunction,
       );
-      expect(nextFunction).toBeCalled();
+      expect(nextFunction).toHaveBeenCalled();
       expect(mockRequest.headers).toEqual(
         expect.objectContaining({
           authorization: "Bearer unknown_token",
-        })
+        }),
       );
     });
   });
